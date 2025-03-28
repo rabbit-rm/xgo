@@ -1,0 +1,60 @@
+version: '3'
+
+vars:
+  name: test
+  source: main.go
+  cgo_enabled: 0
+
+  upx_source: C:\DeveloperEnv\BuildUtils\upx\upx.exe
+tasks:
+  default:
+    - task: prepare
+    - task: linux-amd64
+  prepare:
+    cmds:
+      - go mod tidy
+  linux-amd64:
+    - task: build
+      vars: { os: "linux",arch: "amd64" }
+  windows-amd64:
+    - task: build
+      vars: { os: "windows",arch: "amd64" }
+  build:
+    vars:
+      os: '{{default "unknown" .os}}'
+      arch: '{{default "unknown" .arch}}'
+      ext: '{{if eq .os "windows"}}.exe{{end}}'
+      file: '{{.name}}{{.ext}}'
+    cmds:
+      - task: del
+        vars: { file: '{{.file}}' }
+      - task: go
+        vars: { os: '{{.os}}',arch: '{{.arch}}',file: '{{.file}}' }
+      - task: upx
+        vars: { file: '{{.file}}' }
+  go:
+    cmds:
+      - CGO_ENABLED={{.cgo_enabled}} GOOS={{.os}} GOARCH={{.arch}} go build -ldflags "-w -s" -o {{.file}} {{.source}}
+  upx:
+    cmds:
+      - task: exec
+        vars: { args: '{{.upx_source}} -9q {{.file}}' }
+  env:
+    vars:
+      os: '{{default "unknown" .os}}'
+      arch: '{{default "unknown" .arch}}'
+    cmds:
+      -
+  del:
+    cmds:
+      - task: exec
+        vars: { args: 'if exist {{.file}}  (echo del... {{.file}} & del {{.file}})' }
+  exec:
+    vars:
+      args: '{{default "" .args}}'
+    cmds:
+      - cmd.exe /c '{{.args}}'
+  test:
+    vars:
+    cmds:
+      - echo {{.ext}}
