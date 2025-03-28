@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  name: test
+  name: resource
   source: main.go
   cgo_enabled: 0
 
@@ -10,6 +10,7 @@ tasks:
   default:
     - task: prepare
     - task: linux-amd64
+    - task: zip
   prepare:
     cmds:
       - go mod tidy
@@ -34,7 +35,7 @@ tasks:
         vars: { file: '{{.file}}' }
   go:
     cmds:
-      - CGO_ENABLED={{.cgo_enabled}} GOOS={{.os}} GOARCH={{.arch}} go build -ldflags "-w -s" -o {{.file}} {{.source}}
+      - CGO_ENABLED={{.cgo_enabled}} GOOS={{.os}} GOARCH={{.arch}} go build -trimpath -ldflags "-w -s" -o {{.file}} {{.source}}
   upx:
     cmds:
       - task: exec
@@ -48,13 +49,17 @@ tasks:
   del:
     cmds:
       - task: exec
-        vars: { args: 'if exist {{.file}}  (echo del... {{.file}} & del {{.file}})' }
+        vars: { args: 'if (Test-Path {{.file}}) { Write-Host "del... {{.file}}"; Remove-Item {{.file}} }' }
   exec:
     vars:
       args: '{{default "" .args}}'
     cmds:
-      - cmd.exe /c '{{.args}}'
+      - powershell -NoProfile -NonInteractive -Command "{{.args}}"
   test:
     vars:
     cmds:
       - echo {{.ext}}
+  zip:
+    cmds:
+      - task: exec
+        vars: { args: 'powershell Compress-Archive -Path {{.name}}{{.ext}} -DestinationPath {{.name}}.zip -Force' }
