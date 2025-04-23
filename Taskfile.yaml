@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  name: resource
+  name: xgo
   source: main.go
   cgo_enabled: 0
 
