@@ -19,9 +19,9 @@ func NewGormDB(config *database.Config) *GormDB {
 	}
 }
 
-func (g *GormDB) Connect() error {
+func (gdb *GormDB) Connect() error {
 	logLevel := logger.Silent
-	if g.config.DebugSQL {
+	if gdb.config.DebugSQL {
 		logLevel = logger.Info
 	}
 
@@ -29,7 +29,7 @@ func (g *GormDB) Connect() error {
 		Logger: logger.Default.LogMode(logLevel),
 	}
 
-	db, err := gorm.Open(mysql.Open(g.config.DSN), config)
+	db, err := gorm.Open(mysql.Open(gdb.config.DSN), config)
 	if err != nil {
 		return xerror.Wrap(err, "connect to database")
 	}
@@ -39,17 +39,17 @@ func (g *GormDB) Connect() error {
 		return xerror.Wrap(err, "underlying to sql.DB")
 	}
 
-	sqlDB.SetMaxOpenConns(g.config.MaxOpenConnections)
-	sqlDB.SetMaxIdleConns(g.config.MaxIdleConnections)
-	sqlDB.SetConnMaxLifetime(g.config.MaxLifeConnections)
+	sqlDB.SetMaxOpenConns(gdb.config.MaxOpenConnections)
+	sqlDB.SetMaxIdleConns(gdb.config.MaxIdleConnections)
+	sqlDB.SetConnMaxLifetime(gdb.config.MaxLifeConnections)
 
-	g.db = db
+	gdb.db = db
 	return nil
 }
 
-func (g *GormDB) Close() error {
-	if g.db != nil {
-		sqlDB, err := g.db.DB()
+func (gdb *GormDB) Close() error {
+	if gdb.db != nil {
+		sqlDB, err := gdb.db.DB()
 		if err != nil {
 			return xerror.Wrap(err, "underlying to sql.DB")
 		}
@@ -58,17 +58,17 @@ func (g *GormDB) Close() error {
 	return nil
 }
 
-func (g *GormDB) Ping() error {
-	if g.db == nil {
+func (gdb *GormDB) Ping() error {
+	if gdb.db == nil {
 		return xerror.New("database connection not established")
 	}
-	sqlDB, err := g.db.DB()
+	sqlDB, err := gdb.db.DB()
 	if err != nil {
 		return xerror.Wrap(err, "underlying to sql.DB")
 	}
 	return sqlDB.Ping()
 }
 
-func (g *GormDB) DB() *gorm.DB {
-	return g.db
+func (gdb *GormDB) DB() *gorm.DB {
+	return gdb.db
 }
