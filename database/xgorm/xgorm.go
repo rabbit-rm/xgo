@@ -31,12 +31,12 @@ func (gdb *GormDB) Connect() error {
 
 	db, err := gorm.Open(mysql.Open(gdb.config.DSN), config)
 	if err != nil {
-		return xerror.Wrap(err, "connect to database")
+		return xerror.Wrapf(err, "connect to database")
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return xerror.Wrap(err, "underlying to sql.DB")
+		return xerror.Wrapf(err, "underlying to sql.DB")
 	}
 
 	sqlDB.SetMaxOpenConns(gdb.config.MaxOpenConnections)
@@ -51,7 +51,7 @@ func (gdb *GormDB) Close() error {
 	if gdb.db != nil {
 		sqlDB, err := gdb.db.DB()
 		if err != nil {
-			return xerror.Wrap(err, "underlying to sql.DB")
+			return xerror.Wrapf(err, "underlying to sql.DB")
 		}
 		return sqlDB.Close()
 	}
@@ -60,11 +60,11 @@ func (gdb *GormDB) Close() error {
 
 func (gdb *GormDB) Ping() error {
 	if gdb.db == nil {
-		return xerror.New("database connection not established")
+		return xerror.Newf("database connection not established")
 	}
 	sqlDB, err := gdb.db.DB()
 	if err != nil {
-		return xerror.Wrap(err, "underlying to sql.DB")
+		return xerror.Wrapf(err, "underlying to sql.DB")
 	}
 	return sqlDB.Ping()
 }

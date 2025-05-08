@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	err := New("new error")
+	err := Newf("new error")
 	fmt.Printf("error: %v\n", err)
 	fmt.Printf("error: %+v\n", err)
 	xlog.Infof("error: %v", err)
@@ -27,7 +27,7 @@ func TestNewWithCaller(t *testing.T) {
 
 func TestWrap(t *testing.T) {
 	err := errors.New("new error")
-	err = Wrap(err, "wrap err")
+	err = Wrapf(err, "wrap err")
 	fmt.Printf("error: %v\n", err)
 	fmt.Printf("error: %+v\n", err)
 	xlog.Infof("error: %v", err)

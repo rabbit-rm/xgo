@@ -102,7 +102,7 @@ func validateRotationTime(pattern string, rotationTime time.Duration) error {
 
 	// 如果轮转时间小于 pattern 中的最小时间单位，返回错误
 	if rotationTime < minDuration {
-		return xerror.New("rotation time %v is too small for pattern '%s', minimum allowed is %v",
+		return xerror.Newf("rotation time %v is too small for pattern '%s', minimum allowed is %v",
 			rotationTime, pattern, minDuration)
 	}
 

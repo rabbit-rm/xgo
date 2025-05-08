@@ -9,8 +9,8 @@ import (
 
 const skip = 1
 
-// New 创建一个新的自定义错误，包含堆栈信息
-func New(format string, args ...interface{}) error {
+// Newf 创建一个新的自定义错误，包含堆栈信息
+func Newf(format string, args ...interface{}) error {
 	if len(args) == 0 {
 		return gerror.NewSkip(skip, format)
 	}
@@ -24,8 +24,8 @@ func NewWithCaller(format string, args ...interface{}) error {
 	return gerror.NewSkipf(skip, addCaller(skip, format), args...)
 }
 
-// Wrap 包裹其他错误，用于构造多级错误，包含堆栈信息
-func Wrap(err error, format string, args ...interface{}) error {
+// Wrapf 包裹其他错误，用于构造多级错误，包含堆栈信息
+func Wrapf(err error, format string, args ...interface{}) error {
 	if len(args) == 0 {
 		return gerror.WrapSkip(skip, err, format)
 	}
