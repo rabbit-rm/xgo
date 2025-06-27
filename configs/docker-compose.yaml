@@ -1,0 +1,51 @@
+services:
+  # MySQL 服务
+  mysql:
+    container_name: mysql
+    image: docker.1ms.run/mysql:8.4.5
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root@123456"  # 设置root密码
+    volumes:
+      - /apps/mysql/data:/var/lib/mysql    # 持久化数据
+      - /apps/mysql/logs:/var/log/mysql    # 日志
+      - /apps/mysql/my.cnf:/etc/mysql/my.cnf    # 配置
+    restart: always
+
+  # Kafka 服务
+  kafka:
+    container_name: kafka
+    image: docker.1ms.run/bitnami/kafka:4.0.0
+    networks:
+      - app-tier
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - ALLOW_PLAINTEXT_LISTENER="yes" # 允许明文连接
+    restart: always
+
+  # MinIO 服务
+  minio:
+    container_name: minio
+    image: docker.1ms.run/minio/minio:latest
+    ports:
+      - "9000:9000"  # API端口
+      - "9001:9001"  # 控制台端口
+    environment:
+      MINIO_ROOT_USER: "admin"       # 管理账号
+      MINIO_ROOT_PASSWORD: "adminMinio" # 管理密码
+    volumes:
+      - /apps/minio/data:/data             # 持久化数据
+      - /apps/minio/config:/root/.minio             # 持久化数据
+    command: server /data --console-address ":9001"
+    restart: always
+
+networks:
+  app-tier:
+    name: app-tier
+    driver: bridge
